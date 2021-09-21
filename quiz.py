@@ -2,10 +2,20 @@ import json
 import random
 
 
-def get_question_answers(number, data):
+def get_question_and_answers(number, data):
+    """
+    The function receives as input a list of all questions in dict format and a random number.
+    The question ID starts at 1, not 0, so we offset it
+    Answers to some questions cannot be splitted by ', '.
+    To do this, the separators have been changed to '; ' in JSON manually
+
+    :param number: Random int value from 1 to the number of all question
+    :param data: list of all questions in dict format
+    :return: question in str format and answers in list format
+    """
     question = data[number][str(number + 1)]["question"]
     answers = data[number][str(number + 1)]["answers"].split(', ')
-    if len(answers) > 4:
+    if len(answers) != 4:
         answers = data[number][str(number + 1)]["answers"].split('; ')
     return question, answers
 
@@ -28,6 +38,9 @@ def quiz_game(question, answers, correct_answer):
 
 
 def get_user_answer():
+    """
+    Function waiting for input from the user until he enters the correct answer number in the range from 1 to 4
+    """
     while True:
         try:
             user_answer = int(input('Введите Ваш ответ:  '))
@@ -42,10 +55,14 @@ def get_user_answer():
 
 
 def main():
+    """
+    We get a list of questions from a JSON file, choose a random number within the list indices.
+    Remember the correct answer, it always in [0] index, then we shuffle the answers and send it to the user
+    """
     with open("questions/questions.json", "r", encoding="utf-8") as inf:
         data = json.load(inf)
-    number_question = random.randint(1, len(data))
-    question, answers = get_question_answers(number_question, data)
+    number_question = random.randint(0, len(data) - 1)
+    question, answers = get_question_and_answers(number_question, data)
     correct_answer = answers[0]
     answers = shuffle_answers(answers)
     quiz_game(question, answers, correct_answer)
