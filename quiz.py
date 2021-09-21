@@ -42,7 +42,7 @@ def get_user_answer():
 
 
 def main():
-    with open("questions.json", "r", encoding="utf-8") as inf:
+    with open("questions/questions.json", "r", encoding="utf-8") as inf:
         data = json.load(inf)
     number_question = random.randint(1, len(data))
     question, answers = get_question_answers(number_question, data)
