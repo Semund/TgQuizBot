@@ -1,0 +1,4 @@
+"""
+do <cp settings.py.default settings.py> and insert your token ID!
+"""
+TOKEN = 'Input your token'
