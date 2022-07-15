@@ -46,28 +46,15 @@ def dispatcher(message):
 
 def main_handler(message, user_id, user_name, keyboard):
     if message.text.lower() in ("да", "+", "вопрос"):
-        question = quest.Question()
-        user_questions[user_id] = question
-        bot.send_message(
-            message.chat.id,
-            str(question),
-            reply_markup=keyboard
-        )
+        get_new_question_and_send(keyboard, message, user_id)
         user_states[user_id] = QUIZ_STATE
     elif "счет" in message.text.lower():
         msg = f"{user_name}, твой счет: победы - {user_scores[user_id]['wins']}, поражения " \
               f"{user_scores[user_id]['lose']}\n"
-        bot.reply_to(
-            message,
-            msg,
-            reply_markup=keyboard
-        )
+        bot.reply_to(message, msg, reply_markup=keyboard)
+
     else:
-        bot.reply_to(
-            message,
-            text=f"Я не понимаю тебя, {user_name}\n",
-            reply_markup=keyboard
-        )
+        bot.reply_to(message, text=f"Я не понимаю тебя, {user_name}\n", reply_markup=keyboard)
 
 
 def quiz_handler(message, user_id, user_name, keyboard):
@@ -77,39 +64,27 @@ def quiz_handler(message, user_id, user_name, keyboard):
 
         if current_question.correct_answer == current_question.answers[user_answer - 1]:
             user_scores[user_id]["wins"] += 1
-            msg = f"Совершенно верно, {user_name}!\n"
+            msg = f"Совершенно верно, {user_name}!\n" \
+                  f"Еще вопрос?"
         else:
             user_scores[user_id]["lose"] += 1
-            msg = f"Неправильный ответ, {user_name}!\n" \
+            msg = f"Неправильный ответ, {user_name}!\n"
+            msg += f"Правильный ответ - {current_question.correct_answer}\n" \
+                   f"Твой счет: победы - {user_scores[user_id]['wins']}, поражения " \
+                   f"{user_scores[user_id]['lose']}\n" \
+                   f"Еще вопрос?"
 
-        msg += f"Правильный ответ - {current_question.correct_answer}\n" \
-               f"Твой счет: победы - {user_scores[user_id]['wins']}, поражения " \
-               f"{user_scores[user_id]['lose']}\n"\
-               f"Еще вопрос?"
-
-        bot.send_message(
-            message.chat.id,
-            msg,
-            reply_markup=keyboard
-        )
+        bot.send_message(message.chat.id, msg, reply_markup=keyboard)
         user_states[user_id] = MAIN_STATE
         user_questions[user_id] = None
-    elif message.text.lower() in ("вопрос"):
-        question = quest.Question()
-        user_questions[user_id] = question
-        bot.send_message(
-            message.chat.id,
-            str(question),
-            reply_markup=keyboard
-        )
+
+    elif message.text.lower() in ("вопрос",):
+        get_new_question_and_send(keyboard, message, user_id)
+
     elif "счет" in message.text.lower():
         msg = f"{user_name}, твой счет: победы - {user_scores[user_id]['wins']}, поражения " \
               f"{user_scores[user_id]['lose']}\n"
-        bot.reply_to(
-            message,
-            msg,
-            reply_markup=keyboard
-        )
+        bot.reply_to(message, msg, reply_markup=keyboard)
     else:
         bot.reply_to(
             message,
@@ -117,6 +92,12 @@ def quiz_handler(message, user_id, user_name, keyboard):
                  f"Выбери ответ, введя число от 1 до 4",
             reply_markup=keyboard
         )
+
+
+def get_new_question_and_send(keyboard, message, user_id):
+    question = quest.Question()
+    user_questions[user_id] = question
+    bot.send_message(message.chat.id, str(question), reply_markup=keyboard)
 
 
 bot.polling()
