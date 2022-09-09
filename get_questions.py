@@ -3,6 +3,7 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
+import db
 
 def generate_urls_from_baza_otvetov_ru():
     """
@@ -37,11 +38,7 @@ def format_question_data(question_unformatted_data):
     if len(answers.split(', ')) != 4:
         raise ValueError
 
-    question = {
-        'id': question_data[0],
-        'question': question_data[1],
-        'answers': answers
-    }
+    question = (question_data[1], ) + tuple(answers.split(', '))
     return question
 
 
@@ -66,13 +63,13 @@ def get_question_answers(soup):
     return questions_dict_list
 
 
-def write_questions_to_json_file(questions_list):
+def write_questions_to_db(questions_list):
     """
     The function takes list of all questions in dict format as input and create a JSON-file.
 
     :param questions_list: question's list in dict format
     """
-    with open("questions.json", 'w', encoding='utf-8') as json_file:
+    with open("questions/questions.json", 'w', encoding='utf-8') as json_file:
         json.dump(questions_list, json_file, ensure_ascii=False)
 
 
@@ -85,6 +82,8 @@ def main():
         html_document = requests.get(url).text
         soup = BeautifulSoup(html_document, 'html.parser')
         question_list.extend(get_question_answers(soup))
+        break
+    print(question_list)
     write_questions_to_json_file(question_list)
 
 
