@@ -45,6 +45,8 @@ def get_player_data_from_db(player_telegram_session):
     player_telegram_id = player_telegram_session.from_user.id
     player_db, _ = db.Player.get_or_create(telegram_id=player_telegram_id)
     player_db.player_name = player_telegram_session.from_user.first_name
+    if questions_cache.get(player_db.telegram_id, None) is None:
+        player_db.player_state = MAIN_STATE
     player_db.save()
     return player_db
 
