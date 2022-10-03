@@ -1,31 +1,32 @@
 import os
 
-import sqlite3
+from peewee import *
 
-conn = sqlite3.connect(os.path.join("db", "questions.db"))
-cursor = conn.cursor()
-
-
-def get_cursor():
-    return cursor
+db = SqliteDatabase('quiz.db')
 
 
-def _init_db():
-    """Инициализирует БД"""
-    with open("createdb.sql", "r") as f:
-        sql = f.read()
-    cursor.executescript(sql)
-    conn.commit()
+class Question(Model):
+    body = TextField()
+    correct_answer = CharField()
+    other_answer_1 = CharField()
+    other_answer_2 = CharField()
+    other_answer_3 = CharField()
+
+    class Meta:
+        database = db
 
 
-def check_db_exists():
-    """Проверяет, инициализирована ли БД, если нет — инициализирует"""
-    cursor.execute("SELECT name FROM sqlite_master "
-                   "WHERE type='table' AND name='question'")
-    table_exists = cursor.fetchall()
-    if table_exists:
-        return
-    _init_db()
+class Player(Model):
+    telegram_id = CharField(unique=True)
+    player_name = CharField(max_length=64, default='Незнакомец')
+    player_state = CharField(default='rest')
+    win = IntegerField(default=0)
+    lose = IntegerField(default=0)
+
+    class Meta:
+        database = db
 
 
-check_db_exists()
+if not os.path.isfile('quiz.db'):
+    db.connect()
+    db.create_tables([Question, Player])
